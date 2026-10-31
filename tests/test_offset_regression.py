@@ -30,6 +30,29 @@ def load_method(filename, name, namespace, class_name=None):
 
 
 class OffsetRegression(unittest.IsolatedAsyncioTestCase):
+    async def test_timer_awaits_update_and_state_publication(self):
+        callback = load_method("sensor.py", "timer_callback", {}, "WasteManagementSensorEntity")
+        entity = SimpleNamespace(async_update_ha_state=AsyncMock())
+        await callback(entity, None)
+        entity.async_update_ha_state.assert_awaited_once_with(True)
+
+    async def test_poll_reuses_home_assistant_http_client(self):
+        import datetime
+        shared = object()
+        pickup = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=2)
+        client = SimpleNamespace(async_authenticate=AsyncMock(), async_okta_authorize=AsyncMock(),
+                                 async_get_service_pickup=AsyncMock(return_value=[pickup]))
+        factory = Mock(return_value=client)
+        update = load_method("sensor.py", "async_update", {
+            "WMClient": factory, "get_async_client": Mock(return_value=shared), "datetime": datetime},
+            "WasteManagementSensorEntity")
+        entity = SimpleNamespace(username="test", password="test", hass=object(),
+                                 account_id="account", service_id="trash", offset=0)
+        await update(entity)
+        factory.assert_called_once_with("test", "test", shared)
+        self.assertTrue(entity._attr_available)
+        self.assertEqual(entity._attr_native_value, pickup.astimezone())
+
     async def test_existing_entries_with_missing_none_zero_and_signed_offsets(self):
         for value in ("missing", None, 0, -2, 3):
             with self.subTest(offset=value):
