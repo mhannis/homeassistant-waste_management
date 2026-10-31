@@ -31,7 +31,7 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
     {
         vol.Required("username"): str,
         vol.Required("password"): str,
-        vol.Optional("offset_days", default=None): vol.All(vol.Coerce(int), vol.Range(min=-6, max=6))
+        vol.Optional("offset_days", default=0): vol.All(vol.Coerce(int), vol.Range(min=-6, max=6))
     }
 )
 
@@ -84,7 +84,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self._wmclient: WMClient = await validate_input(self.hass, user_input)
             self.data[CONF_USERNAME] = user_input[CONF_USERNAME]
             self.data[CONF_PASSWORD] = user_input[CONF_PASSWORD]
-            self.data[CONF_OFFSET_DAYS] = user_input[CONF_OFFSET_DAYS]
+            self.data[CONF_OFFSET_DAYS] = user_input.get(CONF_OFFSET_DAYS) or 0
         except InvalidAuth:
             errors["base"] = "invalid_auth"
         except Exception as ex:  # pylint: disable=broad-except
