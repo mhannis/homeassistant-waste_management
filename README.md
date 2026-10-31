@@ -1,6 +1,6 @@
 # Waste Management for Home Assistant — offset_days fix
 
-This public fork contains **version 0.1.7**, a focused fix for sensors failing to load with `Error setting up sensor platform: 'offset_days'`. Older configuration entries may lack that optional field. This version treats a missing offset as zero and preserves configured offsets and sensor unique IDs.
+This public fork contains **version 0.1.8**, a focused fix for sensors failing to load with `Error setting up sensor platform: 'offset_days'`. Older configuration entries may lack that optional field. This version treats a missing offset as zero and preserves configured offsets and sensor unique IDs.
 
 Based on [Teagan42's integration](https://github.com/Teagan42/homeassistant-waste_management), originally created by [dcmeglio](https://github.com/dcmeglio/homeassistant-waste_management). See [CHANGELOG.md](CHANGELOG.md) for scope and limitations.
 
@@ -9,7 +9,7 @@ Based on [Teagan42's integration](https://github.com/Teagan42/homeassistant-wast
 1. Back up your Home Assistant configuration and existing `custom_components/waste_management` directory.
 2. Download this repository and copy its `custom_components/waste_management` directory into your Home Assistant configuration directory, replacing the existing integration files.
 3. Restart Home Assistant to load the updated Python code. Existing Waste Management configuration entries should remain in place; do not delete and recreate them just to apply this fix.
-4. Confirm version `0.1.7` in the installed `manifest.json`, then check the pickup sensors and logs. The integration still requires a working Waste Management account and API.
+4. Confirm version `0.1.8` in the installed `manifest.json`, then check the pickup sensors and logs. The integration still requires a working Waste Management account and API.
 
 If HACS manages a different fork of this integration, a subsequent HACS update may overwrite this manual patch. Avoid installing two copies of the same `waste_management` integration. This fork is not listed in the default HACS catalog.
 
