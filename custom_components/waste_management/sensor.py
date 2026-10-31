@@ -41,7 +41,7 @@ async def async_setup_entry(hass: HomeAssistant, config, add_entities):
                     config_data[CONF_PASSWORD],
                     config_data[CONF_ACCOUNT],
                     svc_id,
-                    offset=config_data[CONF_OFFSET_DAYS],
+                    offset=config_data.get(CONF_OFFSET_DAYS, 0),
                 )
             )
         add_entities(entities, True)
