@@ -71,10 +71,10 @@ class WasteManagementSensorEntity(SensorEntity):
         )
 
     async def timer_callback(self, datetime):
-        self.async_update()
+        await self.async_update_ha_state(True)
 
     async def async_update(self) -> None:
-        client = WMClient(self.username, self.password)
+        client = WMClient(self.username, self.password, get_async_client(self.hass))
         pickup = None
         try:
             await client.async_authenticate()
