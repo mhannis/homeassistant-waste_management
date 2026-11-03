@@ -1,5 +1,5 @@
 {
-  "version": "0.1.8",
+  "version": "0.1.9",
   "domain": "waste_management",
   "name": "Waste Management",
   "config_flow": true,
@@ -18,3 +18,4 @@
   ],
   "iot_class": "cloud_polling"
 }
+
