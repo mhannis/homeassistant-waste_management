@@ -25,3 +25,8 @@ Run `python -m unittest discover -s tests -v`. The tests execute the actual setu
 [Waste Management](https://www.wm.com) integration for Home Assistant
 
 Pull your next pickup date for your trash and recycle from the Waste Managemet API. You will need an account to wm.com for this to work.
+
+### Outage handling (0.1.9)
+
+A failed refresh keeps the last known pickup date available for reminders, with `data_stale: true`. Retries happen hourly until a live request succeeds, then the next scheduled request is at 00:05 on the next local day. Restarting HA restores the cached date and schedule. Manual refresh remains available. An old date is never guessed forward; `pickup_date_passed` indicates an overdue date. On upgrade, retained recorder history can recover the date that older versions replaced with unavailable.
+
