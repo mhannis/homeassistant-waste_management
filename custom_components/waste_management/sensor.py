@@ -76,15 +76,20 @@ class WasteManagementSensorEntity(SensorEntity):
     async def async_update(self) -> None:
         client = WMClient(self.username, self.password, get_async_client(self.hass))
         pickup = None
+        stage = "authentication"
         try:
             await client.async_authenticate()
 
+            stage = "authorization"
             await client.async_okta_authorize()
 
+            stage = "pickup schedule"
             pickup = await client.async_get_service_pickup(
                 self.account_id, self.service_id
             )
-        except Exception:
+        except Exception as ex:
+            response = getattr(ex, "response", None)
+            _LOGGER.warning("Waste Management %s failed: %s (HTTP %s)", stage, type(ex).__name__, getattr(response, "status_code", "n/a"))
             self._attr_available = False
             return
 
@@ -95,3 +100,4 @@ class WasteManagementSensorEntity(SensorEntity):
         proposed_pickup = proposed_pickup + datetime.timedelta(days=self.offset)
         self._attr_native_value = proposed_pickup
         self._attr_available = True
+
