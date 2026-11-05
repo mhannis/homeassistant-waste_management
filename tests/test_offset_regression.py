@@ -20,7 +20,8 @@ class SensorTests(unittest.IsolatedAsyncioTestCase):
         self.now = datetime(2026, 11, 3, 13, tzinfo=timezone.utc)
         self.zone = ZoneInfo('America/New_York')
         self.dt = SimpleNamespace(utcnow=lambda: self.now, now=lambda: self.now.astimezone(self.zone),
-            as_local=lambda v:v.astimezone(self.zone), parse_datetime=lambda v:self.parse(v))
+            as_local=lambda v:v.astimezone(self.zone), parse_datetime=lambda v:self.parse(v),
+            DEFAULT_TIME_ZONE=self.zone)
         self.client = SimpleNamespace(async_authenticate=AsyncMock(), async_okta_authorize=AsyncMock(),
             async_get_service_pickup=AsyncMock(return_value=[datetime(2026,11,4,5,tzinfo=timezone.utc)]))
         self.cancel=Mock()
@@ -45,6 +46,15 @@ class SensorTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.entity._next_refresh.astimezone(self.zone).isoformat(),'2026-11-04T00:05:00-05:00')
         self.assertFalse(self.entity._stale)
         self.ns['WMClient'].assert_called_once_with('test','test','shared')
+    async def test_real_client_naive_dates_use_ha_timezone(self):
+        for month, day, utc_hour in ((11, 11, 5), (7, 8, 4)):
+            self.client.async_get_service_pickup.return_value=[datetime(2026,month,day)]
+            await self.entity.async_update()
+            self.assertFalse(self.entity._stale)
+            self.assertEqual(self.entity._attr_native_value.astimezone(timezone.utc),
+                             datetime(2026,month,day,utc_hour,tzinfo=timezone.utc))
+    def test_restore_metadata_still_rejects_naive_dates(self):
+        self.assertIsNone(self.ns['parse_pickup']('2026-11-11T00:00:00'))
     async def test_outage_retains_date_and_retries_hourly_then_recovers(self):
         await self.entity.async_update()
         value=self.entity._attr_native_value

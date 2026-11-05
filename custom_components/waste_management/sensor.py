@@ -35,6 +35,17 @@ def next_daily_refresh(now):
     return datetime.combine(local.date() + timedelta(days=1), time(0, 5), local.tzinfo)
 
 
+def normalize_api_pickup(value):
+    """WM's client returns local calendar dates as naive midnight datetimes.
+
+    Attach HA's timezone before interpreting them as timestamps. Never use the
+    host OS timezone (HA commonly runs in UTC). Keep restore metadata strict.
+    """
+    if isinstance(value, datetime) and value.tzinfo is None:
+        return value.replace(tzinfo=dt_util.DEFAULT_TIME_ZONE)
+    return parse_pickup(value)
+
+
 async def async_setup_entry(hass, config, add_entities):
     data = config.data
     registry = er.async_get(hass)
@@ -164,7 +175,7 @@ class WasteManagementSensorEntity(SensorEntity, RestoreEntity):
                     pickups = await client.async_get_service_pickup(self.account_id, self.service_id)
                     if not isinstance(pickups, (list, tuple)) or not pickups:
                         raise ValueError("Empty pickup schedule")
-                    parsed = [parse_pickup(value) for value in pickups]
+                    parsed = [normalize_api_pickup(value) for value in pickups]
                     if any(value is None for value in parsed):
                         raise ValueError("Invalid pickup timestamp")
                     # Keep an overdue date if that is all the API has, rather than invent a future one.

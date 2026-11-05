@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.10
+
+- Accept the WM client's timezone-free pickup dates as local calendar dates in Home Assistant's configured timezone. The previous validator incorrectly rejected these valid responses, leaving sensors stale even after successful login.
+- Preserve strict timestamp validation for restored refresh metadata, hourly failure retries, and last-known pickup retention.
+- Add regression coverage for the actual client date shape and both standard/daylight-saving offsets.
+
 ## 0.1.8
 
 - Reuse Home Assistant's shared HTTP client during sensor updates, avoiding blocking SSL certificate loading on the event loop.
